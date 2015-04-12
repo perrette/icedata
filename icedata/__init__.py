@@ -27,4 +27,4 @@ def _import_modules(modules, package=None, raise_error=True):
 
         # Add a few hand functions, if missing
         if not hasattr(m, 'load_path'):
-            m.load_path =  common.create_load_path(m.load_bbox)
+            m.load_path =  common.create_load_path(m.load)

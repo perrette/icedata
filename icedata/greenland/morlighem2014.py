@@ -1,7 +1,7 @@
 """ Bedrock elevation
 """
 import os
-from icedata.common import ncload_bbox as _ncload_bbox
+from icedata.common import ncload as _ncload
 
 # NCFILE = os.path.join(datadir, "MCdataset-2014-10-16.nc")
 NCFILE = os.path.join("greenland","MCdataset-2014-10-16.nc")
@@ -26,7 +26,7 @@ _MAP_VAR_NAMES = {"surface_elevation":"surface",
 VARIABLES = sorted(_MAP_VAR_NAMES.keys())
 RESOLUTION = 150
 
-def load_bbox(variables=None, bbox=None, maxshape=None):
+def load(variables=None, bbox=None, maxshape=None):
     """Load Bamber et al 2013 elevation dataset
     """
     # determine the variables to load
@@ -34,6 +34,6 @@ def load_bbox(variables=None, bbox=None, maxshape=None):
         variables = VARIABLES
 
     # need to read the variables independently
-    data = _ncload_bbox(NCFILE, variables=variables, bbox=bbox, maxshape=maxshape, map_var_names=_MAP_VAR_NAMES, inverted_y_axis=True)
+    data = _ncload(NCFILE, variables=variables, bbox=bbox, maxshape=maxshape, map_var_names=_MAP_VAR_NAMES, inverted_y_axis=True)
     data.dataset = NAME
     return data

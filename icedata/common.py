@@ -39,7 +39,7 @@ def get_datafile(ncfile, dataroot=None):
         dataroot = settings.DATAROOT
     return path.join(dataroot, ncfile)
 
-def ncload_bbox(ncfile, variables, bbox=None, maxshape=None, map_var_names=None, map_dim_names=None, time_idx=None, time_dim='time', inverted_y_axis=False, dataroot=None, x=None, y=None):
+def ncload(ncfile, variables, bbox=None, maxshape=None, map_var_names=None, map_dim_names=None, time_idx=None, time_dim='time', inverted_y_axis=False, dataroot=None, x=None, y=None):
     """Standard ncload for netCDF files
 
     Parameters
@@ -107,9 +107,9 @@ def ncload_bbox(ncfile, variables, bbox=None, maxshape=None, map_var_names=None,
 
     return data
 
-# function factory to create a load path function from load_bbox
+# function factory to create a load path function from load
 # REMOVE???
-def create_load_path(load_bbox):
+def create_load_path(load):
     def load_path(path, variables=None, method="after"):
         """Load variables along a path
 
@@ -138,7 +138,7 @@ def create_load_path(load_bbox):
         r = np.max(xs)
         b = np.min(ys)
         t = np.max(ys)
-        data2d = load_bbox(variables=variables, bbox=[l, r, b, t])
+        data2d = load(variables=variables, bbox=[l, r, b, t])
         # add a new coordinate s
         diff_s = np.sqrt(np.square(np.diff(xs)) + np.square(np.diff(ys)))
         s = np.concatenate(([0], np.cumsum(diff_s)))

@@ -7,7 +7,7 @@ from os.path import join
 import numpy as np
 import netCDF4 as nc
 import dimarray as da
-from icedata.common import ncload_bbox as _ncload_bbox
+from icedata.common import ncload as _ncload
 
 NAME = "presentday_greenland"
 DESC = __doc__
@@ -27,21 +27,21 @@ _NCFILE = join("greenland", "Present_Day_Greenland","Greenland_5km_{version}.nc"
 _map_var_names = {"surface_elevation":"usrf", "bedrock_elevation":"topg", "ice_thickness":"thk", "surface_velocity":"surfvelmag","surface_elevation_rate":"dhdt"}
 _map_dim_names = {"x":"x1","y":"y1"}
 
-def load_bbox(variables=None, bbox=None, maxshape=None, version=VERSION):
+def load(variables=None, bbox=None, maxshape=None, version=VERSION):
     """Load Present-day Greenland standard dataset
 
     Examples
     --------
     >>> from icedata.greenland import presentday as pdg
     >>> bbox = [-500e3, 0, -1500e3, -800e3] # (in meters)
-    >>> pdg.load_bbox()
-    >>> pdg.load_bbox(bbox)
+    >>> pdg.load()
+    >>> pdg.load(bbox)
     """
     # determine the variables to load
     if variables is None:
         variables = VARIABLES
     ncname = _NCFILE.format(version=version)
-    data = _ncload_bbox(ncname, variables=variables, bbox=bbox, maxshape=maxshape, map_var_names=_map_var_names, map_dim_names=_map_dim_names, time_idx=0)
+    data = _ncload(ncname, variables=variables, bbox=bbox, maxshape=maxshape, map_var_names=_map_var_names, map_dim_names=_map_dim_names, time_idx=0)
     data.grid_mapping = GRID_MAPPING  # if not already present in the netCDF
     data.dataset = NAME 
     return data

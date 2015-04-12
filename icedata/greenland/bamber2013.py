@@ -3,7 +3,7 @@
 import os
 import numpy as np
 import netCDF4 as nc
-from icedata.common import ncload_bbox as _ncload_bbox, get_datafile as _get_datafile, get_slices_xy
+from icedata.common import ncload as _ncload, get_datafile as _get_datafile, get_slices_xy
 
 #ncfile = datadir+'bamber_2013_1km/Greenland_bedrock_topography_V2.nc'
 NCFILE = os.path.join('greenland','bamber_2013_1km','Greenland_bedrock_topography_V3.nc')
@@ -31,7 +31,7 @@ VARIABLES = sorted(_MAP_VAR_NAMES.keys())
 RESOLUTION = 1000
 
 
-def load_bbox(variables=None, bbox=None, maxshape=None, processed=True):
+def load(variables=None, bbox=None, maxshape=None, processed=True):
     """Load Bamber et al 2013 elevation dataset
     """
     map_var_names = _MAP_VAR_NAMES.copy()
@@ -49,7 +49,7 @@ def load_bbox(variables=None, bbox=None, maxshape=None, processed=True):
         x = ds.variables['projection_x_coordinate'][:]
         y = ds.variables['projection_y_coordinate'][:]
 
-    data = _ncload_bbox(NCFILE, variables=variables, bbox=bbox, maxshape=maxshape, map_var_names=map_var_names, x=x, y=y)
+    data = _ncload(NCFILE, variables=variables, bbox=bbox, maxshape=maxshape, map_var_names=map_var_names, x=x, y=y)
     data.grid_mapping = GRID_MAPPING  # if not already present in the netCDF
     data.dataset = NAME 
     return data
