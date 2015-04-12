@@ -1,3 +1,4 @@
+from __future__ import division
 from os import path
 import numpy as np
 import netCDF4 as nc
@@ -6,28 +7,31 @@ from . import settings
 
 def get_slices_xy(xy, bbox, maxshape, inverted_y_axis):
     x, y = xy
+    if inverted_y_axis:
+        y = y[::-1]
     # determine start and stop indices form bounding box
     if bbox is not None:
         l, r, b, t = bbox  # in meters
         startx, stopx = np.searchsorted(x[:], [l, r])
-        starty, stopy = np.searchsorted(y[:], [b, t], sorter=None if not inverted_y_axis else np.arange(y.size)[::-1])
+        startx = min(startx, x.size-1)
+        starty, stopy = np.searchsorted(y[:], [b, t])
+        starty = min(starty, y.size-1)
     else:
         startx, stopx = 0, x.size
         starty, stopy = 0, y.size
-    nx = (stopx-startx+1)
-    ny = (stopy-starty+1)
     # sub-sample dataset if it exceeds maximum desired shape
     if maxshape is not None:
         shapey, shapex = maxshape
-        stepy = int(ny/shapey)
-        stepx = int(nx/shapex)
+        stepy = int(y.size//shapey)
+        stepx = int(x.size//shapex)
     else:
         stepy = stepx = 1
+    slice_x = slice(startx, stopx, stepx)
     # invert sampling ?
     if inverted_y_axis:
-        stepy *= -1
-    slice_x = slice(startx, stopx, stepx)
-    slice_y = slice(starty, stopy, stepy)
+        slice_y = slice(y.size-starty, y.size-stopy, -stepy)
+    else:
+        slice_y = slice(starty, stopy, stepy)
     return slice_x, slice_y
 
 def get_datafile(ncfile, dataroot=None):

@@ -10,6 +10,8 @@ import dimarray as da
 from icedata.common import ncload_bbox as _ncload_bbox
 
 NAME = "presentday_greenland"
+DESC = __doc__
+
 VARIABLES = ["surface_elevation", "bedrock_elevation", "surface_velocity", "ice_thickness", "surface_elevation_rate"]
 GRID_MAPPING = {'ellipsoid': u'WGS84',
      'false_easting': 0.0,

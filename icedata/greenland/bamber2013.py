@@ -8,7 +8,8 @@ from icedata.common import ncload_bbox as _ncload_bbox, get_datafile as _get_dat
 #ncfile = datadir+'bamber_2013_1km/Greenland_bedrock_topography_V2.nc'
 NCFILE = os.path.join('greenland','bamber_2013_1km','Greenland_bedrock_topography_V3.nc')
 
-NAME = "bamber2013"
+NAME = __name__
+DESC = __doc__
 
 GRID_MAPPING = {'ellipsoid': u'WGS84',
          'false_easting': 0.0,
