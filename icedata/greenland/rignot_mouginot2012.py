@@ -4,6 +4,7 @@
 import os
 import numpy as np
 import netCDF4 as nc
+import dimarray as da
 from icedata.common import get_datafile, get_slices_xy
 
 NAME = __name__
@@ -22,22 +23,22 @@ _MAP_VAR_NAMES = {"surface_velocity_x":"vx", "surface_velocity_y":"vy"}
 
 VARIABLES = sorted(_MAP_VAR_NAMES.keys())
 
-def load(bbox=None, maxshape=None):
+def load_bbox(bbox=None, variables=None, maxshape=None):
     """ load data for a region
     
-    parameters:
-    -----------
-    bbox: llx, lly, urx, ury: projection coordinates of lower left and upper right corners
+    Parameters
+    ----------
+    bbox: left, right, bottom, top (in local coordinate system)
     maxshape: tuple, optional
         maximum shape of the data to be loaded
 
-
-    return: 
+    Returns
     -------
-    x, y, vx, vy
-
     NOTE: projection coordinates: lon0=-45, lat0=90, sec_lat=70
     """
+    if variables is None:
+        variables = VARIABLES
+
     f = nc.Dataset(get_datafile(NCFILE))
 
     # reconstruct coordinates
@@ -47,23 +48,23 @@ def load(bbox=None, maxshape=None):
     x = np.linspace (xmin, xmin + spacing*(nx-1), nx)  # ~ 10000 * 170000 points, 
     y = np.linspace (ymax, ymax - spacing*(ny-1), ny)  # reversed data
 
-    slice_x, slice_y = get_slices_xy(xy=(x,y), bbox, maxshape, inverted_y_axis=True)
+    slice_x, slice_y = get_slices_xy((x,y), bbox, maxshape, inverted_y_axis=True)
 
-    vx = f.variables['vx'][slice_x]
-    vy = f.variables['vy'][slice_y]
+    vx = f.variables['vx'][slice_y, slice_x]
+    vy = f.variables['vy'][slice_y, slice_x]
     x = x[slice_x]
     y = y[slice_y]
 
     # convert all to a dataset
     ds = da.Dataset()
-    ds['surface_velocity_x'] = da.DimArray(vx, axes=[y,x], dims=['y','x'])
-    ds['surface_velocity_y'] = da.DimArray(vy, axes=[y,x], dims=['y','x'])
+    for nm in variables:
+        ncvar = _MAP_VAR_NAMES[nm]
+        ds[nm] = da.DimArray(f.variables[ncvar][slice_y, slice_x], axes=[y,x], dims=['y','x'])
+        # attributes
+        for att in f.variables[ncvar].ncattrs():
+            setattr(ds[nm], att.lower(), f.variables[ncvar].getncattr(att))
 
-    # also set metadata
-    for att in f.variables['vx'].ncattrs():
-        setattr(ds['surface_velocity_x'], att.lower(), f.variables['vx'].getncattr(att))
-    for att in f.variables['vy'].ncattrs():
-        setattr(ds['surface_velocity_y'], att.lower(), f.variables['vy'].getncattr(att))
+    # attributes
     for att in f.ncattrs():
         setattr(ds, att.lower(), f.getncattr(att))
 
