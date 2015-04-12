@@ -1,16 +1,17 @@
-import dimarray as da
 import numpy as np
+import netCDF4 as nc
+import dimarray as da
 
-def get_slices_xy(xy, bbox, maxshape):
+def get_slices_xy(xy, bbox, maxshape, inverted_y_axis):
     x, y = xy
     # determine start and stop indices form bounding box
     if bbox is not None:
         l, r, b, t = bbox  # in meters
         startx, stopx = np.searchsorted(x[:], [l, r])
-        starty, stopy = np.searchsorted(y[:], [b, t])
+        starty, stopy = np.searchsorted(y[:], [b, t], sorter=None if not inverted_y_axis else np.arange(y.size)[::-1])
     else:
-        startx, stopx = 0, x.size-1
-        starty, stopy = 0, y.size-1
+        startx, stopx = 0, x.size
+        starty, stopy = 0, y.size
     nx = (stopx-startx+1)
     ny = (stopy-starty+1)
     # sub-sample dataset if it exceeds maximum desired shape
@@ -19,12 +20,70 @@ def get_slices_xy(xy, bbox, maxshape):
         stepy = int(ny/shapey)
         stepx = int(nx/shapex)
     else:
-        stepy = stepx = None
+        stepy = stepx = 1
+    # invert sampling ?
+    if inverted_y_axis:
+        stepy *= -1
     slice_x = slice(startx, stopx, stepx)
     slice_y = slice(starty, stopy, stepy)
     return slice_x, slice_y
 
+def ncload_bbox(ncfile, variables, bbox=None, maxshape=None, map_var_names=None, map_dim_names=None, time_idx=None, time_dim='time', inverted_y_axis=False):
+    """Standard ncload for netCDF files
+
+    Parameters
+    ----------
+    map_var_name : None or dict-like : make standard variables and actual file variables names match
+    dim_var_name : None or dict-like : make standard dimensions and actual file dimensions names match
+    inverted_y_axis : deal with the case where y axis is inverted (Rignot and Mouginot, Morlighem...)
+    time_idx, time_dim : can be provided to extract a time slice
+    """
+    # determine the variables to load
+    if map_var_names is not None:
+        ncvariables = [map_var_names[nm] for nm in variables]
+    else:
+        ncvariables = variables
+
+    if map_dim_names is not None:
+        xnm = map_dim_names['x']
+        ynm = map_dim_names['y']
+    else:
+        xnm = 'x'
+        ynm = 'y'
+
+    # open the netCDF dataset
+    nc_ds = nc.Dataset(ncfile)
+
+    # determine the indices to extract
+    x = nc_ds.variables[xnm]
+    y = nc_ds.variables[ynm]
+    slice_x, slice_y = get_slices_xy(xy=(x, y), bbox=bbox, maxshape=maxshape, inverted_y_axis=inverted_y_axis)
+    indices = {xnm:slice_x,ynm:slice_y}
+    if time_idx is not None:
+        indices[time_dim] = time_idx
+
+    # load the data using dimarray (which also copy attributes etc...)
+    data = da.read_nc(nc_ds, ncvariables, indices=indices, indexing='position')
+
+    # close dataset
+    nc_ds.close()
+
+    # rename dimensions appropriately and set metadata
+    if map_dim_names is not None:
+        if data.dims == (xnm, ynm):
+            data.dims = ('x', 'y')
+        elif data.dims == (ynm, xnm):
+            data.dims = ('y', 'x')
+        # unknown case? do nothing
+
+    # rename variable names
+    if map_var_names is not None:
+        data.rename_keys({ncvar:var for var, ncvar in zip(variables, ncvariables)}, inplace=True)
+
+    return data
+
 # function factory to create a load path function from load_bbox
+# REMOVE???
 def create_load_path(load_bbox):
     def load_path(path, variables=None, method="after"):
         """Load variables along a path
