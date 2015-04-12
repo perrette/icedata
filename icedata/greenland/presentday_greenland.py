@@ -12,8 +12,8 @@ from icedata.common import get_slices_xy
 
 NAME = "presentday_greenland"
 VERSION = "v1.1"
-_basename = "Greenland_5km_v{version}.nc"
-_NCFILE = join(DATAROOT, "greenland", "Present_Day_Greenland",_basename)
+RESOLUTION = 5000
+_NCFILE = join("{dataroot}", "greenland", "Present_Day_Greenland","Greenland_5km_{version}.nc")
 VARIABLES = ["surface_elevation", "bedrock_elevation", "surface_velocity", "ice_thickness", "surface_elevation_rate"]
 GRID_MAPPING = {'ellipsoid': u'WGS84',
      'false_easting': 0.0,
@@ -32,7 +32,7 @@ def load_bbox(bbox=None, variables=None, maxshape=None, version=VERSION):
     ncvariables = [_namelookup[nm] for nm in variables]
 
     # open the netCDF dataset
-    nc_ds = nc.Dataset(_NCFILE.format(version))
+    nc_ds = nc.Dataset(_NCFILE.format(version=version, dataroot=DATAROOT))
 
     # determine the indices to extract
     x = nc_ds.variables['x1']
