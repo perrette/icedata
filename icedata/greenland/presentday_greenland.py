@@ -11,7 +11,9 @@ from icedata.settings import DATAROOT
 from icedata.common import get_slices_xy
 
 NAME = "presentday_greenland"
-_NCFILE = join(DATAROOT, "greenland", "Present_Day_Greenland","Greenland_5km_v1.1.nc")
+VERSION = "v1.1"
+_basename = "Greenland_5km_v{version}.nc"
+_NCFILE = join(DATAROOT, "greenland", "Present_Day_Greenland",_basename)
 VARIABLES = ["surface_elevation", "bedrock_elevation", "surface_velocity", "ice_thickness", "surface_elevation_rate"]
 GRID_MAPPING = {'ellipsoid': u'WGS84',
      'false_easting': 0.0,
@@ -23,14 +25,14 @@ GRID_MAPPING = {'ellipsoid': u'WGS84',
 
 _namelookup = {"surface_elevation":"usrf", "bedrock_elevation":"topg", "ice_thickness":"thk", "surface_velocity":"surfvelmag","surface_elevation_rate":"dhdt"}
 
-def load_bbox(bbox=None, variables=None, maxshape=None):
+def load_bbox(bbox=None, variables=None, maxshape=None, version=VERSION):
     # determine the variables to load
     if variables is None:
         variables = VARIABLES
     ncvariables = [_namelookup[nm] for nm in variables]
 
     # open the netCDF dataset
-    nc_ds = nc.Dataset(_NCFILE)
+    nc_ds = nc.Dataset(_NCFILE.format(version))
 
     # determine the indices to extract
     x = nc_ds.variables['x1']
@@ -50,4 +52,3 @@ def load_bbox(bbox=None, variables=None, maxshape=None):
     data.dataset = NAME 
 
     return data
-
