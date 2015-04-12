@@ -27,7 +27,7 @@ _NCFILE = join("greenland", "Present_Day_Greenland","Greenland_5km_{version}.nc"
 _map_var_names = {"surface_elevation":"usrf", "bedrock_elevation":"topg", "ice_thickness":"thk", "surface_velocity":"surfvelmag","surface_elevation_rate":"dhdt"}
 _map_dim_names = {"x":"x1","y":"y1"}
 
-def load_bbox(bbox=None, variables=None, maxshape=None, version=VERSION):
+def load_bbox(variables=None, bbox=None, maxshape=None, version=VERSION):
     """Load Present-day Greenland standard dataset
 
     Examples

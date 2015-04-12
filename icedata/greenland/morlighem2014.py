@@ -26,7 +26,7 @@ _MAP_VAR_NAMES = {"surface_elevation":"surface",
 VARIABLES = sorted(_MAP_VAR_NAMES.keys())
 RESOLUTION = 150
 
-def load_bbox(bbox=None, variables=None, maxshape=None):
+def load_bbox(variables=None, bbox=None, maxshape=None):
     """Load Bamber et al 2013 elevation dataset
     """
     # determine the variables to load

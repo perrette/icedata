@@ -31,7 +31,7 @@ VARIABLES = sorted(_MAP_VAR_NAMES.keys())
 RESOLUTION = 1000
 
 
-def load_bbox(bbox=None, variables=None, maxshape=None, processed=True):
+def load_bbox(variables=None, bbox=None, maxshape=None, processed=True):
     """Load Bamber et al 2013 elevation dataset
     """
     map_var_names = _MAP_VAR_NAMES.copy()

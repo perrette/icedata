@@ -23,7 +23,7 @@ _MAP_VAR_NAMES = {"surface_velocity_x":"vx", "surface_velocity_y":"vy"}
 
 VARIABLES = sorted(_MAP_VAR_NAMES.keys())
 
-def load_bbox(bbox=None, variables=None, maxshape=None):
+def load_bbox(variables=None, bbox=None, maxshape=None):
     """ load data for a region
     
     Parameters
