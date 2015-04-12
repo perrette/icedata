@@ -50,6 +50,5 @@ def load(variables=None, bbox=None, maxshape=None, processed=True):
         y = ds.variables['projection_y_coordinate'][:]
 
     data = _ncload(NCFILE, variables=variables, bbox=bbox, maxshape=maxshape, map_var_names=map_var_names, x=x, y=y)
-    data.grid_mapping = GRID_MAPPING  # if not already present in the netCDF
     data.dataset = NAME 
     return data

@@ -5,7 +5,7 @@ import os
 import numpy as np
 import netCDF4 as nc
 import dimarray as da
-from icedata.common import get_datafile, get_slices_xy
+from icedata.common import get_datafile, get_slices_xy, check_variables
 
 NAME = __name__
 DESC = __doc__
@@ -28,6 +28,7 @@ def load(variables=None, bbox=None, maxshape=None):
     
     Parameters
     ----------
+    variables : variables to load
     bbox: left, right, bottom, top (in local coordinate system)
     maxshape: tuple, optional
         maximum shape of the data to be loaded
@@ -38,6 +39,7 @@ def load(variables=None, bbox=None, maxshape=None):
     """
     if variables is None:
         variables = VARIABLES
+    variables, _variable = check_variables(variables)
 
     f = nc.Dataset(get_datafile(NCFILE))
 
@@ -72,5 +74,8 @@ def load(variables=None, bbox=None, maxshape=None):
     ds.description = DESC
 
     f.close()
+
+    if _variable:
+        ds = ds[_variable]
 
     return ds

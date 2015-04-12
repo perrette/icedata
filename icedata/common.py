@@ -39,6 +39,14 @@ def get_datafile(ncfile, dataroot=None):
         dataroot = settings.DATAROOT
     return path.join(dataroot, ncfile)
 
+def check_variables(variables):
+    if isinstance(variables, str):
+        variable = variables
+        variables = [variable]
+    else:
+        variable = None
+    return variables, variable
+
 def ncload(ncfile, variables, bbox=None, maxshape=None, map_var_names=None, map_dim_names=None, time_idx=None, time_dim='time', inverted_y_axis=False, dataroot=None, x=None, y=None):
     """Standard ncload for netCDF files
 
@@ -52,6 +60,7 @@ def ncload(ncfile, variables, bbox=None, maxshape=None, map_var_names=None, map_
     x, y : array-like : provide coordinates directly, when not present in file.
     """
     ncfile = get_datafile(ncfile, dataroot)
+    variables, _variable = check_variables(variables)
 
     # determine the variables to load
     if map_var_names is not None:
@@ -105,7 +114,26 @@ def ncload(ncfile, variables, bbox=None, maxshape=None, map_var_names=None, map_
     if map_var_names is not None:
         data.rename_keys({ncvar:var for var, ncvar in zip(variables, ncvariables)}, inplace=True)
 
+    # only one variable
+    if _variable is not None:
+        data = data[_variable]
+
     return data
+
+# def accept_single_variable(func_variables):
+#     """ decorator so that wrapped function return DimArray instead of Dataset when called
+#     """
+#     def func_variable(variables=None, bbox=None, maxshape=None, **kwargs):
+#         _isstr = True
+#         if isinstance(variables, str):
+#             variable = variables
+#             variables = [variable]
+#         res = func_variables(variables, bbox, maxshape, **kwargs)
+#         if _isstr:
+#             res = res[variable]
+#         return res
+#     func_variable.__doc__ = func_variables.__doc__
+#     return func_variable
 
 # function factory to create a load path function from load
 # REMOVE???

@@ -42,6 +42,6 @@ def load(variables=None, bbox=None, maxshape=None, version=VERSION):
         variables = VARIABLES
     ncname = _NCFILE.format(version=version)
     data = _ncload(ncname, variables=variables, bbox=bbox, maxshape=maxshape, map_var_names=_map_var_names, map_dim_names=_map_dim_names, time_idx=0)
-    data.grid_mapping = GRID_MAPPING  # if not already present in the netCDF
-    data.dataset = NAME 
+    data.dataset = NAME
+    data.description = DESC
     return data
