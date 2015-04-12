@@ -35,6 +35,5 @@ def load_bbox(bbox=None, variables=None, maxshape=None):
 
     # need to read the variables independently
     data = _ncload_bbox(NCFILE, variables=variables, bbox=bbox, maxshape=maxshape, map_var_names=_MAP_VAR_NAMES, inverted_y_axis=True)
-    data.grid_mapping = GRID_MAPPING  # if not already present in the netCDF
     data.dataset = NAME
     return data
