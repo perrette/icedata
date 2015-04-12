@@ -1,6 +1,8 @@
+from os import path
 import numpy as np
 import netCDF4 as nc
 import dimarray as da
+from . import settings
 
 def get_slices_xy(xy, bbox, maxshape, inverted_y_axis):
     x, y = xy
@@ -28,19 +30,29 @@ def get_slices_xy(xy, bbox, maxshape, inverted_y_axis):
     slice_y = slice(starty, stopy, stepy)
     return slice_x, slice_y
 
-def ncload_bbox(ncfile, variables, bbox=None, maxshape=None, map_var_names=None, map_dim_names=None, time_idx=None, time_dim='time', inverted_y_axis=False):
+def get_datafile(ncfile, dataroot=None):
+    if dataroot is None:
+        dataroot = settings.DATAROOT
+    return path.join(dataroot, ncfile)
+
+def ncload_bbox(ncfile, variables, bbox=None, maxshape=None, map_var_names=None, map_dim_names=None, time_idx=None, time_dim='time', inverted_y_axis=False, dataroot=None, x=None, y=None):
     """Standard ncload for netCDF files
 
     Parameters
     ----------
     map_var_name : None or dict-like : make standard variables and actual file variables names match
-    dim_var_name : None or dict-like : make standard dimensions and actual file dimensions names match
+    map_dim_name : None or dict-like : make standard dimensions and actual file dimensions names match
     inverted_y_axis : deal with the case where y axis is inverted (Rignot and Mouginot, Morlighem...)
     time_idx, time_dim : can be provided to extract a time slice
+    dataroot : provide an alternative root path for datasets
+    x, y : array-like : provide coordinates directly, when not present in file.
     """
+    ncfile = get_datafile(ncfile, dataroot)
+
     # determine the variables to load
     if map_var_names is not None:
-        ncvariables = [map_var_names[nm] for nm in variables]
+        map_var_names = map_var_names.copy() # becaause of pop
+        ncvariables = [map_var_names.pop(nm,nm) for nm in variables]
     else:
         ncvariables = variables
 
@@ -54,9 +66,13 @@ def ncload_bbox(ncfile, variables, bbox=None, maxshape=None, map_var_names=None,
     # open the netCDF dataset
     nc_ds = nc.Dataset(ncfile)
 
+    external_axes = x is not None or y is not None
+    if x is None:
+        x = nc_ds.variables[xnm]
+    if y is None:
+        y = nc_ds.variables[ynm]
+
     # determine the indices to extract
-    x = nc_ds.variables[xnm]
-    y = nc_ds.variables[ynm]
     slice_x, slice_y = get_slices_xy(xy=(x, y), bbox=bbox, maxshape=maxshape, inverted_y_axis=inverted_y_axis)
     indices = {xnm:slice_x,ynm:slice_y}
     if time_idx is not None:
@@ -67,6 +83,11 @@ def ncload_bbox(ncfile, variables, bbox=None, maxshape=None, map_var_names=None,
 
     # close dataset
     nc_ds.close()
+
+    # in case axes were provided externally, just replace the values
+    if external_axes:
+        data.axes[xnm][:] = x[slice_x]
+        data.axes[ynm][:] = y[slice_y]
 
     # rename dimensions appropriately and set metadata
     if map_dim_names is not None:
