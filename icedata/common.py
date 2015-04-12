@@ -5,7 +5,28 @@ import netCDF4 as nc
 import dimarray as da
 from . import settings
 
+def transform_bbox(bbox, grid_mapping1, grid_mapping2):
+    # get CARTOPY classes from C.F.1-6 convention
+    from dimarray.geo.crs import get_crs
+    crs1 = get_crs(grid_mapping1)
+    crs2 = get_crs(grid_mapping2)
+    # make a fake grid to transform
+    l, r, b, t = bbox
+    x1, y1 = np.meshgrid(np.linspace(l, r, 10), np.linspace(b,t,10))
+    xyz = crs2.transform_points(crs1, x1, y1)
+    x2 = xyz[...,0]
+    y2 = xyz[...,1]
+    l2 = np.min(x2)
+    r2 = np.max(x2)
+    b2 = np.min(y2)
+    t2 = np.max(y2)
+    return l2, r2, b2, t2
+
 def get_slices_xy(xy, bbox, maxshape, inverted_y_axis):
+    """Return indexing slices along x and y.
+
+    Accounts for bounding box, maxshape not to exceep, inverted y axis...
+    """
     x, y = xy
     if inverted_y_axis:
         y = y[::-1]
