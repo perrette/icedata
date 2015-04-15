@@ -61,7 +61,7 @@ def get_datafile(ncfile, dataroot=None):
     return path.join(dataroot, ncfile)
 
 def check_variables(variables):
-    if isinstance(variables, str):
+    if isinstance(variables, basestring):
         variable = variables
         variables = [variable]
     else:
