@@ -21,7 +21,7 @@ GRID_MAPPING = {'ellipsoid': u'WGS84',
 
 _MAP_VAR_NAMES = {"surface_velocity_x":"vx", "surface_velocity_y":"vy"}
 
-VARIABLES = sorted(_MAP_VAR_NAMES.keys())
+VARIABLES = sorted(_MAP_VAR_NAMES.keys()) + ["surface_velocity"]
 
 def load(variables=None, bbox=None, maxshape=None):
     """ load data for a region
@@ -41,6 +41,39 @@ def load(variables=None, bbox=None, maxshape=None):
         variables = VARIABLES
     variables, _variable = check_variables(variables)
 
+    if 'surface_velocity' in variables:
+        # make sure the component are included
+        surfvel = True
+        add_vars = ["surface_velocity_x", "surface_velocity_y"]
+        added_vars = []
+        variables = [v for v in variables] # copy
+        for v in add_vars:
+            if v not in variables:
+                variables.append(v)
+                added_vars.append(v)
+        variables.remove("surface_velocity")
+    else:
+        surfvel = False
+
+    ds = _load(variables, bbox, maxshape)
+
+    # now compute velocity magnitude
+    if surfvel:
+        ds["surface_velocity"] = np.sqrt(np.square(ds["surface_velocity_x"]) + np.square(ds["surface_velocity_y"]))
+        ds["surface_velocity"].units = ds["surface_velocity_x"].units
+        ds["surface_velocity"].long_name = "Surface Velocity Magnitude"
+        for v in added_vars:
+            del ds[v] # demove variable
+
+    if _variable:
+        ds = ds[_variable]
+
+    return ds
+
+
+def _load(variables, bbox=None, maxshape=None):
+    """
+    """
     f = nc.Dataset(get_datafile(NCFILE))
 
     # reconstruct coordinates
@@ -74,8 +107,5 @@ def load(variables=None, bbox=None, maxshape=None):
     ds.description = DESC
 
     f.close()
-
-    if _variable:
-        ds = ds[_variable]
 
     return ds
