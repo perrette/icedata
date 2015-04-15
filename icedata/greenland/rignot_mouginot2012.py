@@ -92,8 +92,9 @@ def _load(variables, bbox=None, maxshape=None):
 
     # convert all to a dataset
     ds = da.Dataset()
+    _map_var_names = _MAP_VAR_NAMES.copy()
     for nm in variables:
-        ncvar = _MAP_VAR_NAMES[nm]
+        ncvar = _map_var_names.pop(nm,nm)
         ds[nm] = da.DimArray(f.variables[ncvar][slice_y, slice_x], axes=[y,x], dims=['y','x'])
         # attributes
         for att in f.variables[ncvar].ncattrs():
