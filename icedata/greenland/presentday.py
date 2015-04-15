@@ -7,7 +7,7 @@ from os.path import join
 import numpy as np
 import netCDF4 as nc
 import dimarray as da
-from icedata.common import ncload as _ncload
+from icedata.common import ncload as _ncload, get_datafile as _get_datafile
 
 NAME = "presentday_greenland"
 DESC = __doc__
@@ -26,6 +26,9 @@ VERSION = "v1.1"
 _NCFILE = join("greenland", "Present_Day_Greenland","Greenland_5km_{version}.nc")
 _map_var_names = {"surface_elevation":"usrf", "bedrock_elevation":"topg", "ice_thickness":"thk", "surface_velocity":"surfvelmag","surface_elevation_rate":"dhdt"}
 _map_dim_names = {"x":"x1","y":"y1"}
+
+def get_file(version=VERSION):
+    return _get_datafile(_NCFILE.format(version=version))
 
 def load(variables=None, bbox=None, maxshape=None, version=VERSION):
     """Load Present-day Greenland standard dataset
