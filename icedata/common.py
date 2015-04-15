@@ -68,7 +68,7 @@ def check_variables(variables):
         variable = None
     return variables, variable
 
-def ncload(ncfile, variables, bbox=None, maxshape=None, map_var_names=None, map_dim_names=None, time_idx=None, time_dim='time', inverted_y_axis=False, dataroot=None, x=None, y=None):
+def ncload(ncfile, variables=None, bbox=None, maxshape=None, map_var_names=None, map_dim_names=None, time_idx=None, time_dim='time', inverted_y_axis=False, dataroot=None, x=None, y=None, xdim='x', ydim='y'):
     """Standard ncload for netCDF files
 
     Parameters
@@ -91,11 +91,11 @@ def ncload(ncfile, variables, bbox=None, maxshape=None, map_var_names=None, map_
         ncvariables = variables
 
     if map_dim_names is not None:
-        xnm = map_dim_names['x']
-        ynm = map_dim_names['y']
+        xnm = map_dim_names[xdim]
+        ynm = map_dim_names[ydim]
     else:
-        xnm = 'x'
-        ynm = 'y'
+        xnm = xdim
+        ynm = ydim
 
     # open the netCDF dataset
     nc_ds = nc.Dataset(ncfile)
@@ -126,9 +126,9 @@ def ncload(ncfile, variables, bbox=None, maxshape=None, map_var_names=None, map_
     # rename dimensions appropriately and set metadata
     if map_dim_names is not None:
         if data.dims == (xnm, ynm):
-            data.dims = ('x', 'y')
+            data.dims = (xdim, ydim)
         elif data.dims == (ynm, xnm):
-            data.dims = ('y', 'x')
+            data.dims = (ydim, xdim)
         # unknown case? do nothing
 
     # rename variable names
@@ -141,24 +141,9 @@ def ncload(ncfile, variables, bbox=None, maxshape=None, map_var_names=None, map_
 
     return data
 
-# def accept_single_variable(func_variables):
-#     """ decorator so that wrapped function return DimArray instead of Dataset when called
-#     """
-#     def func_variable(variables=None, bbox=None, maxshape=None, **kwargs):
-#         _isstr = True
-#         if isinstance(variables, str):
-#             variable = variables
-#             variables = [variable]
-#         res = func_variables(variables, bbox, maxshape, **kwargs)
-#         if _isstr:
-#             res = res[variable]
-#         return res
-#     func_variable.__doc__ = func_variables.__doc__
-#     return func_variable
-
 # function factory to create a load path function from load
 # REMOVE???
-def create_load_path(load):
+def create_load_path(load_map_func):
     def load_path(path, variables=None, method="after"):
         """Load variables along a path
 
@@ -187,7 +172,7 @@ def create_load_path(load):
         r = np.max(xs)
         b = np.min(ys)
         t = np.max(ys)
-        data2d = load(variables=variables, bbox=[l, r, b, t])
+        data2d = load_map_func(variables=variables, bbox=[l, r, b, t])
         # add a new coordinate s
         diff_s = np.sqrt(np.square(np.diff(xs)) + np.square(np.diff(ys)))
         s = np.concatenate(([0], np.cumsum(diff_s)))
