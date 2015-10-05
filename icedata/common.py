@@ -43,8 +43,8 @@ def get_slices_xy(xy, bbox, maxshape, inverted_y_axis):
     # sub-sample dataset if it exceeds maximum desired shape
     if maxshape is not None:
         shapey, shapex = maxshape
-        stepy = int(y.size//shapey)
-        stepx = int(x.size//shapex)
+        stepy = max(1, int(y.size//shapey)) # step 0 forbidden
+        stepx = max(1, int(x.size//shapex))  
     else:
         stepy = stepx = 1
     slice_x = slice(startx, stopx, stepx)
