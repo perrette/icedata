@@ -107,7 +107,7 @@ Download and install the code:
     cd icedata
     python setup.py install
     
-Currently, the data mentioned above are expected to be located under `~home/icedata`. 
+Currently, the data mentioned above are expected to be located under the home directory as `~/icedata`. 
 The structure under the `icedata` directory is currently kept as close as possible to 
 the original data source. This means, no clear order... Admittedly this could be made 
 simpler, and it is planned to add a search_file function to add some simplicity in how
