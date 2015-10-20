@@ -84,7 +84,7 @@ Dependencies
 ------------
 - numpy [1.9.2]
 - [netCDF4](https://github.com/Unidata/netcdf4-python) [1.1.7] - [see instructions here](https://github.com/perrette/python-install/blob/master/README.md#netcdf4)
-- [dimarray (dev)](https://github.com/perrette/dimarray) [0.1.9.dev-852f76e]: please install the latest version from github. The pip version will not work  
+- [dimarray (dev)](https://github.com/perrette/dimarray) [0.1.9.dev-b83c7a]: please install the latest version from github. The pip version will not work  
 - [cartopy](https://github.com/SciTools/cartopy) [0.11.0]: used for grid projections, [see instructions here](https://github.com/perrette/python-install/blob/master/README.md#cartopy)
 
 
